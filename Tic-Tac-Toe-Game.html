@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Tic Tac Toe</title>
+  <link href="https://fonts.googleapis.com/css?family=Monoton" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Merienda&display=swap" rel="stylesheet">
+  <style>
+      * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      font-family: 'Monoton', cursive;
+      background-color: #3E517A;
+      overflow: hidden;
+      padding: 1vh 0;
+    }
+
+    h1 {
+      font-size: 6vh; 
+      color:black  
+    }
+
+    .msg-container {
+      font-size: 2vh;
+      margin-top:2vh;
+      min-height: 3vh;
+    }
+
+    .input-area {
+      display: flex;
+      gap: 1vw;
+      align-items: center;
+      margin: 0.5vh 0vh;
+      margin-top: 3vh;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    input[type="text"], .input-area button {
+      padding: 0.6vh 1vw;
+      font-size: 1.9vh;
+      border-radius: 0.3rem;
+      font-family: 'Merienda';
+      
+      border: none;
+      outline: none;
+    }
+
+    input[type="text"] {
+      min-width: 10opx;
+    }
+
+    .input-area button {
+      background-color: #191913;
+      color:white;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .input-area button:hover {
+      background-color: #333;
+    }
+    
+    .scoreboard {
+      font-size: 3vh;
+      display: flex;
+      gap: 5vw;
+      color:#CACF85;
+      justify-content: center;
+      margin-top: 2vh;
+      flex-wrap: wrap;
+    }
+
+
+    .game {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 1vmin;
+      width: 80vmin;
+      height: 80vmin;
+      margin-bottom: 1vh;
+    }
+
+    .box {
+      background-color: #E27396;
+      border: none;
+      border-radius: 0.5rem;
+      font-size: 6vmin;
+      color: #CACF85;
+      box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
+      font-family: 'Monoton', cursive;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .box:hover {
+      background-color: #ff94a2;
+    }
+
+    .highlight {
+      background-color: #CACF85 !important;
+      color:  #ff94a2 !important;
+      font-weight: bold;
+      transform: scale(1.05);
+       box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
+      transition: background-color 0.5s, transform 0.3s;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 1vw;
+      justify-content: center;
+      margin-bottom: 1vh;
+    }
+
+    .button-group button {
+      padding: 0.5rem 1rem;
+      font-size: 2.5vh;
+      background-color: #191913;
+      color:#CACF85;
+      border: none;
+      margin-top: 2vh;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      font-family: 'Monoton', cursive;
+      box-shadow: 0 0 1rem rgba(0, 0, 0, 0.5);
+    }
+
+    @media (max-width: 600px) {
+      .game {
+        width: 90vmin;
+        height: 90vmin;
+      }
+
+      .box {
+        font-size: 11vmin;
+      }
+      
+    
+   #msg{
+       color:#CACF85;
+       font-size: 2.4vh;
+   }
+    
+    }
+  </style>
+</head>
+<body>
+  <h1>Tic - Tac - Toe</h1>
+
+  <div class="msg-container" id="msg-container">
+    <p id="msg"></p>
+  </div>
+
+  <div class="input-area">
+    <input type="text" id="playerXName" placeholder="Player X Name" />
+    <input type="text" id="playerOName" placeholder="Player O Name" />
+  </div>
+
+  <div class="scoreboard">
+    <div><span id="displayX">Player X</span>: <span id="scoreX">0</span></div>
+    <div><span id="displayO">Player O</span>: <span id="scoreO">0</span></div>
+  </div>
+
+  <div class="game">
+    <button class="box"></button><button class="box"></button><button class="box"></button>
+    <button class="box"></button><button class="box"></button><button class="box"></button>
+    <button class="box"></button><button class="box"></button><button class="box"></button>
+  </div>
+
+  <div class="button-group">
+    <button id="new-btn">New Game</button>
+    <button id="reset-btn">Reset Game</button>
+  </div>
+
+  
+  <script>
+    const boxes = document.querySelectorAll(".box");
+    const resetBtn = document.getElementById("reset-btn");
+    const newGameBtn = document.getElementById("new-btn");
+    const msg = document.getElementById("msg");
+
+    const scoreXEl = document.getElementById("scoreX");
+    const scoreOEl = document.getElementById("scoreO");
+    const nameXInput = document.getElementById("playerXName");
+    const nameOInput = document.getElementById("playerOName");
+    const displayX = document.getElementById("displayX");
+    const displayO = document.getElementById("displayO");
+
+    let turnO = true;
+    let filledBoxes = 0;
+    let isGameOver = false;
+    let score = { X: 0, O: 0 };
+
+    const winPatterns = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6],
+    ];
+
+    const updateNames = () => {
+      displayX.innerText = nameXInput.value || "Player X  ";
+      displayO.innerText = nameOInput.value || "Player O ";
+    };
+
+    const resetGame = () => {
+      turnO = true;
+      filledBoxes = 0;
+      isGameOver = false;
+      boxes.forEach((box) => {
+        box.innerText = "";
+        box.disabled = false;
+        box.classList.remove("highlight");
+      });
+      msg.innerText = "";
+      updateNames();
+    };
+
+    const resetAll = () => {
+      score = { X : 0,  O : 0 };
+      updateScoreboard();
+      resetGame();
+    };
+
+    const showWinner = (winner, winningPattern) => {
+      const winnerName = winner === "X" ? displayX.innerText : displayO.innerText;
+      msg.innerText = `🎉Congratulations:- "${winnerName}" wins!`;
+      isGameOver = true;
+      boxes.forEach((box, idx) => {
+        box.disabled = true;
+        if (winningPattern.includes(idx)) {
+          box.classList.add("highlight");
+        }
+      });
+      score[winner]++;
+      updateScoreboard();
+    };
+
+    const updateScoreboard = () => {
+      scoreXEl.innerText = score["X"];
+      scoreOEl.innerText = score["O"];
+    };
+
+    const checkWinner = () => {
+      for (let pattern of winPatterns) {
+        const [a, b, c] = pattern;
+        const val1 = boxes[a].innerText;
+        const val2 = boxes[b].innerText;
+        const val3 = boxes[c].innerText;
+        if (val1 && val1 === val2 && val2 === val3) {
+          showWinner(val1, pattern);
+          return;
+        }
+      }
+
+      if (filledBoxes === 9 && !isGameOver) {
+        msg.innerText = "😐OOP's It's a draw!";
+        isGameOver = true;
+      }
+    };
+
+    boxes.forEach((box) => {
+      box.addEventListener("click", () => {
+        if (!box.innerText && !isGameOver) {
+          box.innerText = turnO ? "O" : "X";
+          box.disabled = true;
+          filledBoxes++;
+          checkWinner();
+          turnO = !turnO;
+        }
+      });
+    });
+
+    resetBtn.addEventListener("click", resetAll);
+    newGameBtn.addEventListener("click", resetGame);
+  </script>
+</body>
+</html>
